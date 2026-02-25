@@ -147,6 +147,35 @@ button {
   }
 }
 
+@media (max-width: 960px) {
+  .app-layout-with-sidebar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side-nav {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+  }
+
+  .app-layout-with-sidebar .app-main-inner {
+    margin-left: 0;
+    padding: 0;
+  }
+
+  .side-nav-footer {
+    display: none;
+  }
+}
+
 .summary-column {
   display: flex;
   flex-direction: column;
@@ -544,6 +573,85 @@ button {
   gap: 0.75rem;
 }
 
+.app-layout-with-sidebar {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 3rem;
+  display: block;
+  position: relative;
+}
+
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: max(1rem, calc((100vw - 1120px) / 2 + 1.5rem));
+  width: 220px;
+  height: 100vh;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: linear-gradient(to bottom, #ffffff, #eef2ff);
+  padding: 1rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-y: auto;
+  z-index: 20;
+}
+
+.app-layout-with-sidebar .app-main-inner {
+  margin-left: calc(220px + 1.5rem);
+  max-width: none;
+  padding: 0;
+}
+
+.side-nav-header {
+  margin-bottom: 0.4rem;
+}
+
+.side-nav-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.side-nav-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.side-nav-item {
+  border: none;
+  background: transparent;
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.side-nav-item.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.side-nav-footer {
+  margin-top: auto;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  font-size: 0.75rem;
+}
+
+.side-nav-user-name {
+  font-weight: 500;
+}
+
+.side-nav-user-email {
+  color: var(--text-muted);
+}
+
 .primary-button,
 .secondary-button {
   border-radius: 8px;
@@ -648,6 +756,12 @@ button {
   justify-content: flex-end;
   gap: 0.4rem;
   margin-top: 0.2rem;
+}
+
+.form-help-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
 }
 
 .tag-muted {
@@ -755,7 +869,25 @@ button {
 .login-footer {
   display: flex;
   justify-content: flex-end;
+  gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.login-actions-row {
+  margin-top: 0.35rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.link-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.78rem;
+  color: #1d4ed8;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .login-metric {
@@ -791,6 +923,33 @@ button {
 
 .login-side-list li + li {
   margin-top: 0.25rem;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0;
+  font-size: 0.8rem;
+}
+
+.profile-label {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.profile-value {
+  text-align: right;
+}
+
+.profile-course-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.profile-course-list li + li {
+  margin-top: 0.2rem;
 }
 
 @media (max-width: 768px) {

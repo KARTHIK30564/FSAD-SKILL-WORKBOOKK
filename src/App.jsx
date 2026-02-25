@@ -99,6 +99,18 @@ function AppInner() {
   const [courses, setCourses] = useState(MOCK_COURSES);
   const [assignments, setAssignments] = useState(initialAssignments);
   const [activeTab, setActiveTab] = useState('assignments'); // 'assignments' | 'submissions'
+  const [studentView, setStudentView] = useState('home'); // 'home' | 'courses' | 'submit' | 'help' | 'profile'
+  const [teacherView, setTeacherView] = useState('home'); // 'home' | 'courses' | 'assignments' | 'help' | 'profile'
+  const [auth, setAuth] = useState({
+    email: '',
+    password: '',
+  });
+  const [registration, setRegistration] = useState({
+    email: '',
+    password: '',
+    role: 'student',
+  });
+  const [resetEmail, setResetEmail] = useState('');
 
   const [studentSubmissionDraft, setStudentSubmissionDraft] = useState({
     assignmentId: null,
@@ -271,9 +283,15 @@ function AppInner() {
   const navigate = useNavigate();
 
   const headlineStats = role === 'student' ? studentStats : teacherStats;
+  const canSubmitStudentAssignment =
+    Boolean(studentSubmissionDraft.assignmentId) && Boolean(studentSubmissionDraft.fileName.trim());
 
   function handleLogin(nextRole) {
+    if (!nextRole || !auth.email.trim() || !auth.password.trim()) return;
     setRole(nextRole);
+    setActiveTab('assignments');
+    setStudentView('home');
+    setTeacherView('home');
     navigate(nextRole === 'student' ? '/student' : '/teacher');
   }
 
@@ -349,22 +367,60 @@ function AppInner() {
             </div>
 
             <div className="form-row">
-              <label className="form-label">Name</label>
-              <input className="form-input" type="text" placeholder="Enter your name" />
+              <label className="form-label">Email ID</label>
+              <input
+                className="form-input"
+                type="email"
+                placeholder="name@example.com"
+                value={auth.email}
+                onChange={(e) =>
+                  setAuth((prev) => ({
+                    ...prev,
+                    email: e.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="form-row">
-              <label className="form-label">Email</label>
-              <input className="form-input" type="email" placeholder="name@example.com" />
+              <label className="form-label">Password</label>
+              <input
+                className="form-input"
+                type="password"
+                placeholder="Enter your password"
+                value={auth.password}
+                onChange={(e) =>
+                  setAuth((prev) => ({
+                    ...prev,
+                    password: e.target.value,
+                  }))
+                }
+              />
+              <div className="login-actions-row">
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => navigate('/forgot-password')}
+                >
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             <div className="login-footer">
               <button
                 type="button"
                 className="primary-button"
-                disabled={!role}
+                disabled={!role || !auth.email.trim() || !auth.password.trim()}
                 onClick={() => handleLogin(role)}
               >
-                Continue as {role ? role : '...'}
+                Login
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => navigate('/register')}
+              >
+                Register
               </button>
             </div>
           </div>
@@ -392,6 +448,164 @@ function AppInner() {
           </aside>
         </div>
       </div>
+        }
+      />
+
+      <Route
+        path="/forgot-password"
+        element={
+          <div className="login-shell">
+            <div className="login-card">
+              <div className="login-main">
+                <div className="brand" style={{ marginBottom: '0.75rem' }}>
+                  <div className="brand-logo">
+                    <div className="brand-logo-inner">AG</div>
+                  </div>
+                  <div className="brand-text">
+                    <div className="brand-title">AuroraGrade</div>
+                    <div className="brand-subtitle">Reset your password</div>
+                  </div>
+                </div>
+                <div className="login-title">Forgot password</div>
+                <div className="login-subtitle">
+                  Enter your email ID to reset the password.
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Email ID</label>
+                  <input
+                    className="form-input"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                  />
+                </div>
+                <div className="login-footer">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => navigate('/')}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    disabled={!resetEmail.trim()}
+                  >
+                    Reset password
+                  </button>
+                </div>
+              </div>
+              <aside className="login-side">
+                <div className="login-title">Password recovery</div>
+                <div className="login-metric">
+                  In this demo, reset email sending is simulated only.
+                </div>
+              </aside>
+            </div>
+          </div>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <div className="login-shell">
+            <div className="login-card">
+              <div className="login-main">
+                <div className="brand" style={{ marginBottom: '0.75rem' }}>
+                  <div className="brand-logo">
+                    <div className="brand-logo-inner">AG</div>
+                  </div>
+                  <div className="brand-text">
+                    <div className="brand-title">AuroraGrade</div>
+                    <div className="brand-subtitle">Create your account</div>
+                  </div>
+                </div>
+                <div className="login-title">Register</div>
+                <div className="login-subtitle">
+                  Register with your email ID and password.
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Role</label>
+                  <select
+                    className="form-select"
+                    value={registration.role}
+                    onChange={(e) =>
+                      setRegistration((prev) => ({
+                        ...prev,
+                        role: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Email ID</label>
+                  <input
+                    className="form-input"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={registration.email}
+                    onChange={(e) =>
+                      setRegistration((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="form-row">
+                  <label className="form-label">Password</label>
+                  <input
+                    className="form-input"
+                    type="password"
+                    placeholder="Create a password"
+                    value={registration.password}
+                    onChange={(e) =>
+                      setRegistration((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="login-footer">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={() => navigate('/')}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    disabled={!registration.email.trim() || !registration.password.trim()}
+                    onClick={() => {
+                      setRole(registration.role);
+                      setAuth({
+                        email: registration.email.trim(),
+                        password: registration.password,
+                      });
+                      navigate('/');
+                    }}
+                  >
+                    Register account
+                  </button>
+                </div>
+              </div>
+              <aside className="login-side">
+                <div className="login-title">Quick setup</div>
+                <div className="login-metric">
+                  After registration, return to login and click Login.
+                </div>
+              </aside>
+            </div>
+          </div>
         }
       />
 
@@ -425,7 +639,54 @@ function AppInner() {
               </header>
 
               <main className="app-main">
-                <div className="app-main-inner">
+                <div className="app-layout-with-sidebar">
+                  <aside className="side-nav">
+                    <div className="side-nav-header">
+                      <div className="side-nav-title">Student</div>
+                      <div className="side-nav-subtitle">Learning workspace</div>
+                    </div>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${studentView === 'home' ? 'active' : ''}`}
+                      onClick={() => {
+                        setStudentView('home');
+                        setActiveTab('assignments');
+                      }}
+                    >
+                      Home
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${studentView === 'courses' ? 'active' : ''}`}
+                      onClick={() => setStudentView('courses')}
+                    >
+                      Courses
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${studentView === 'submit' ? 'active' : ''}`}
+                      onClick={() => setStudentView('submit')}
+                    >
+                      Submit Assignment
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${studentView === 'help' ? 'active' : ''}`}
+                      onClick={() => setStudentView('help')}
+                    >
+                      Help
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${studentView === 'profile' ? 'active' : ''}`}
+                      onClick={() => setStudentView('profile')}
+                    >
+                      Profile
+                    </button>
+                  </aside>
+                  <div className="app-main-inner">
+                    {studentView === 'home' && (
+                      <>
                   <section className="summary-column">
                     <div className="panel">
                       <div className="panel-inner">
@@ -743,13 +1004,14 @@ function AppInner() {
                                     <button
                                       type="button"
                                       className="primary-button"
-                                      onClick={() =>
+                                      onClick={() => {
+                                        setStudentView('submit');
                                         setStudentSubmissionDraft({
                                           assignmentId: assignment.id,
                                           fileName: studentSubmission?.fileLink || '',
                                           comments: studentSubmission?.comments || '',
-                                        })
-                                      }
+                                        });
+                                      }}
                                     >
                                       {studentSubmission ? 'Update submission' : 'Submit assignment'}
                                     </button>
@@ -884,19 +1146,22 @@ function AppInner() {
                             </select>
                           </div>
                           <div className="form-row">
-                            <label className="form-label">File name or link</label>
+                            <label className="form-label">Upload file</label>
                             <input
                               className="form-input"
-                              type="text"
-                              placeholder="e.g. cs101-assignment2.zip or GitHub repo URL"
-                              value={studentSubmissionDraft.fileName}
-                              onChange={(e) =>
+                              type="file"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.txt"
+                              onChange={(e) => {
+                                const file = e.target.files && e.target.files[0];
                                 setStudentSubmissionDraft((prev) => ({
                                   ...prev,
-                                  fileName: e.target.value,
-                                }))
-                              }
+                                  fileName: file ? file.name : '',
+                                }));
+                              }}
                             />
+                            <span className="form-help-text">
+                              Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, ZIP, TXT.
+                            </span>
                           </div>
                           <div className="form-row">
                             <label className="form-label">Comments for your teacher (optional)</label>
@@ -930,18 +1195,215 @@ function AppInner() {
                             <button
                               type="button"
                               className="primary-button"
-                              disabled={!studentSubmissionDraft.assignmentId}
+                              disabled={!canSubmitStudentAssignment}
                               onClick={() =>
                                 handleStudentSubmit(studentSubmissionDraft.assignmentId)
                               }
                             >
-                              Save submission
+                              Submit assignment
                             </button>
                           </div>
                         </div>
                       </div>
                     </div>
                   </section>
+                      </>
+                    )}
+
+                    {studentView === 'courses' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner courses-panel">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Courses</div>
+                                <div className="panel-title-sub">
+                                  Browse and switch between your enrolled classes.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="courses-list">
+                              {courses.map((course) => (
+                                <button
+                                  key={course.id}
+                                  type="button"
+                                  className={`course-item ${
+                                    selectedCourseId === course.id ? 'active' : ''
+                                  }`}
+                                  onClick={() => setSelectedCourseId(course.id)}
+                                >
+                                  <div className="course-title">
+                                    {course.code} · {course.name}
+                                  </div>
+                                  <div className="course-meta">
+                                    <span>{course.term}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {studentView === 'submit' && (
+                      <section className="secondary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Submit assignment</div>
+                                <div className="panel-title-sub">
+                                  Upload your work and comments for the selected assignment.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="form">
+                              <div className="form-row">
+                                <label className="form-label">Assignment</label>
+                                <select
+                                  className="form-select"
+                                  value={studentSubmissionDraft.assignmentId || ''}
+                                  onChange={(e) => {
+                                    const id = e.target.value || null;
+                                    if (!id) {
+                                      setStudentSubmissionDraft({
+                                        assignmentId: null,
+                                        fileName: '',
+                                        comments: '',
+                                      });
+                                      return;
+                                    }
+                                    const assignment = assignments.find((a) => a.id === id);
+                                    const submission = assignment?.submissions.find(
+                                      (s) => s.studentName === 'You'
+                                    );
+                                    setStudentSubmissionDraft({
+                                      assignmentId: id,
+                                      fileName: submission?.fileLink || '',
+                                      comments: submission?.comments || '',
+                                    });
+                                  }}
+                                >
+                                  <option value="">Choose an assignment...</option>
+                                  {assignments.map((a) => (
+                                    <option key={a.id} value={a.id}>
+                                      {a.title} ({courses.find((c) => c.id === a.courseId)?.code || 'Course'})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Upload file</label>
+                                <input
+                                  className="form-input"
+                                  type="file"
+                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip,.txt"
+                                  onChange={(e) => {
+                                    const file = e.target.files && e.target.files[0];
+                                    setStudentSubmissionDraft((prev) => ({
+                                      ...prev,
+                                      fileName: file ? file.name : '',
+                                    }));
+                                  }}
+                                />
+                                <span className="form-help-text">
+                                  Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, ZIP, TXT.
+                                </span>
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Comments for your teacher (optional)</label>
+                                <textarea
+                                  className="form-textarea"
+                                  rows={3}
+                                  placeholder="Share anything that will help your teacher review your work."
+                                  value={studentSubmissionDraft.comments}
+                                  onChange={(e) =>
+                                    setStudentSubmissionDraft((prev) => ({
+                                      ...prev,
+                                      comments: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-footer">
+                                <button
+                                  type="button"
+                                  className="secondary-button"
+                                  onClick={() =>
+                                    setStudentSubmissionDraft({
+                                      assignmentId: null,
+                                      fileName: '',
+                                      comments: '',
+                                    })
+                                  }
+                                >
+                                  Clear form
+                                </button>
+                                <button
+                                  type="button"
+                                  className="primary-button"
+                                  disabled={!canSubmitStudentAssignment}
+                                  onClick={() =>
+                                    handleStudentSubmit(studentSubmissionDraft.assignmentId)
+                                  }
+                                >
+                                  Submit assignment
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {studentView === 'help' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Help</div>
+                                <div className="panel-title-sub">
+                                  Student usage tips for assignments and deadlines.
+                                </div>
+                              </div>
+                            </div>
+                            <ul className="login-side-list">
+                              <li>Use Home to track deadlines and submission status.</li>
+                              <li>Use Submit Assignment to add or update your work.</li>
+                              <li>Use Courses to switch to another class.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {studentView === 'profile' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Profile</div>
+                                <div className="panel-title-sub">
+                                  Account summary for the current student session.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="profile-row">
+                              <div className="profile-label">Role</div>
+                              <div className="profile-value">Student</div>
+                            </div>
+                            <div className="profile-row">
+                              <div className="profile-label">Courses</div>
+                              <div className="profile-value">{courses.length}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+                  </div>
                 </div>
               </main>
             </div>
@@ -981,7 +1443,57 @@ function AppInner() {
               </header>
 
               <main className="app-main">
-                <div className="app-main-inner">
+                <div className="app-layout-with-sidebar">
+                  <aside className="side-nav">
+                    <div className="side-nav-header">
+                      <div className="side-nav-title">Teacher</div>
+                      <div className="side-nav-subtitle">Teaching workspace</div>
+                    </div>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${teacherView === 'home' ? 'active' : ''}`}
+                      onClick={() => {
+                        setTeacherView('home');
+                        setActiveTab('assignments');
+                      }}
+                    >
+                      Home
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${teacherView === 'courses' ? 'active' : ''}`}
+                      onClick={() => setTeacherView('courses')}
+                    >
+                      Courses
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${teacherView === 'assignments' ? 'active' : ''}`}
+                      onClick={() => {
+                        setTeacherView('assignments');
+                        setActiveTab('assignments');
+                      }}
+                    >
+                      Assignments
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${teacherView === 'help' ? 'active' : ''}`}
+                      onClick={() => setTeacherView('help')}
+                    >
+                      Help
+                    </button>
+                    <button
+                      type="button"
+                      className={`side-nav-item ${teacherView === 'profile' ? 'active' : ''}`}
+                      onClick={() => setTeacherView('profile')}
+                    >
+                      Profile
+                    </button>
+                  </aside>
+                  <div className="app-main-inner">
+                    {teacherView === 'home' && (
+                      <>
                   <section className="summary-column">
                     <div className="panel">
                       <div className="panel-inner">
@@ -1617,6 +2129,317 @@ function AppInner() {
                       </div>
                     </div>
                   </section>
+                      </>
+                    )}
+
+                    {teacherView === 'courses' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner courses-panel">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Courses</div>
+                                <div className="panel-title-sub">
+                                  Manage courses and add new classes.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="courses-list">
+                              {courses.map((course) => (
+                                <button
+                                  key={course.id}
+                                  type="button"
+                                  className={`course-item ${
+                                    selectedCourseId === course.id ? 'active' : ''
+                                  }`}
+                                  onClick={() => setSelectedCourseId(course.id)}
+                                >
+                                  <div className="course-title">
+                                    {course.code} · {course.name}
+                                  </div>
+                                  <div className="course-meta">
+                                    <span>{course.term}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Create course</div>
+                                <div className="panel-title-sub">
+                                  Add a new course for your students.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="form">
+                              <div className="form-row">
+                                <label className="form-label">Course code</label>
+                                <input
+                                  className="form-input"
+                                  type="text"
+                                  placeholder="e.g. CS450"
+                                  value={newCourseDraft.code}
+                                  onChange={(e) =>
+                                    setNewCourseDraft((prev) => ({
+                                      ...prev,
+                                      code: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Course name</label>
+                                <input
+                                  className="form-input"
+                                  type="text"
+                                  placeholder="e.g. Machine Learning"
+                                  value={newCourseDraft.name}
+                                  onChange={(e) =>
+                                    setNewCourseDraft((prev) => ({
+                                      ...prev,
+                                      name: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Term</label>
+                                <input
+                                  className="form-input"
+                                  type="text"
+                                  placeholder="e.g. Spring 2026"
+                                  value={newCourseDraft.term}
+                                  onChange={(e) =>
+                                    setNewCourseDraft((prev) => ({
+                                      ...prev,
+                                      term: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-footer">
+                                <button
+                                  type="button"
+                                  className="secondary-button"
+                                  onClick={() =>
+                                    setNewCourseDraft({
+                                      code: '',
+                                      name: '',
+                                      term: newCourseDraft.term,
+                                      totalAssignments: 0,
+                                    })
+                                  }
+                                >
+                                  Reset
+                                </button>
+                                <button
+                                  type="button"
+                                  className="primary-button"
+                                  disabled={!newCourseDraft.code.trim() || !newCourseDraft.name.trim()}
+                                  onClick={handleCreateCourse}
+                                >
+                                  Add course
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {teacherView === 'assignments' && (
+                      <section className="secondary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Assignments & grading</div>
+                                <div className="panel-title-sub">
+                                  Focused view for assignment list and publishing.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="list">
+                              {courseAssignments.length === 0 ? (
+                                <div className="list-empty">
+                                  No assignments created for this course.
+                                </div>
+                              ) : (
+                                courseAssignments.map((assignment) => (
+                                  <div key={assignment.id} className="assignment-item">
+                                    <div className="assignment-title">{assignment.title}</div>
+                                    <div className="assignment-meta-row">
+                                      <span>Due {formatDate(assignment.dueDate)}</span>
+                                      <span>{assignment.submissions.length} submissions</span>
+                                      <span>Max {assignment.maxMarks}</span>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Create assignment</div>
+                                <div className="panel-title-sub">
+                                  Add a new assignment to the selected course.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="form">
+                              <div className="form-row">
+                                <label className="form-label">Course</label>
+                                <select
+                                  className="form-select"
+                                  value={teacherAssignmentDraft.courseId}
+                                  onChange={(e) =>
+                                    setTeacherAssignmentDraft((prev) => ({
+                                      ...prev,
+                                      courseId: e.target.value,
+                                    }))
+                                  }
+                                >
+                                  {courses.map((c) => (
+                                    <option key={c.id} value={c.id}>
+                                      {c.code} · {c.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Title</label>
+                                <input
+                                  className="form-input"
+                                  type="text"
+                                  placeholder="e.g. Project 1: Portfolio website"
+                                  value={teacherAssignmentDraft.title}
+                                  onChange={(e) =>
+                                    setTeacherAssignmentDraft((prev) => ({
+                                      ...prev,
+                                      title: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Due date</label>
+                                <input
+                                  className="form-input"
+                                  type="date"
+                                  value={teacherAssignmentDraft.dueDate}
+                                  onChange={(e) =>
+                                    setTeacherAssignmentDraft((prev) => ({
+                                      ...prev,
+                                      dueDate: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-row">
+                                <label className="form-label">Max marks</label>
+                                <input
+                                  className="form-input"
+                                  type="number"
+                                  value={teacherAssignmentDraft.maxMarks}
+                                  onChange={(e) =>
+                                    setTeacherAssignmentDraft((prev) => ({
+                                      ...prev,
+                                      maxMarks: e.target.value,
+                                    }))
+                                  }
+                                />
+                              </div>
+                              <div className="form-footer">
+                                <button
+                                  type="button"
+                                  className="secondary-button"
+                                  onClick={() =>
+                                    setTeacherAssignmentDraft({
+                                      courseId: teacherAssignmentDraft.courseId,
+                                      title: '',
+                                      description: '',
+                                      dueDate: '',
+                                      maxMarks: 100,
+                                    })
+                                  }
+                                >
+                                  Reset
+                                </button>
+                                <button
+                                  type="button"
+                                  className="primary-button"
+                                  disabled={!teacherAssignmentDraft.title.trim()}
+                                  onClick={handleCreateAssignment}
+                                >
+                                  Publish assignment
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {teacherView === 'help' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Help</div>
+                                <div className="panel-title-sub">
+                                  Guidance for creating assignments and grading submissions.
+                                </div>
+                              </div>
+                            </div>
+                            <ul className="login-side-list">
+                              <li>Use Home for grading queue and assignment overview.</li>
+                              <li>Use Courses to manage course catalog.</li>
+                              <li>Use Assignments to focus only on assignment workflows.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+
+                    {teacherView === 'profile' && (
+                      <section className="summary-column">
+                        <div className="panel">
+                          <div className="panel-inner">
+                            <div className="panel-header">
+                              <div className="panel-title">
+                                <div className="panel-title-main">Profile</div>
+                                <div className="panel-title-sub">
+                                  Account summary for the current teacher session.
+                                </div>
+                              </div>
+                            </div>
+                            <div className="profile-row">
+                              <div className="profile-label">Role</div>
+                              <div className="profile-value">Teacher</div>
+                            </div>
+                            <div className="profile-row">
+                              <div className="profile-label">Courses</div>
+                              <div className="profile-value">{courses.length}</div>
+                            </div>
+                            <div className="profile-row">
+                              <div className="profile-label">Assignments</div>
+                              <div className="profile-value">{assignments.length}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    )}
+                  </div>
                 </div>
               </main>
             </div>
